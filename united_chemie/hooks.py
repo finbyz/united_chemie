@@ -116,13 +116,11 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Bill Of Entry": {
+		"validate": "united_chemie.united_chemie.doc_events.bill_of_entry.validate_taxes",	
+	}
+}
 
 # Scheduled Tasks
 # ---------------
