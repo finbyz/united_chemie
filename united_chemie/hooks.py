@@ -119,7 +119,10 @@ app_license = "MIT"
 doc_events = {
 	"Bill Of Entry": {
 		"validate": "united_chemie.united_chemie.doc_events.bill_of_entry.validate_taxes",	
-	}
+	},
+    # "Purchase Invoice": {
+    #     "validate": "united_chemie.transaction.validate",
+	# }
 }
 
 # Scheduled Tasks
@@ -211,3 +214,10 @@ doc_events = {
 # auth_hooks = [
 # 	"united_chemie.auth.validate"
 # ]
+# from india_compliance.gst_india.overrides import transaction
+# from united_chemie.transaction import validate_transaction as custom_validate_transaction
+# transaction.validate_transaction = custom_validate_transaction
+
+from united_chemie.transaction import validate_transaction_custom as custom_validate_transaction
+from india_compliance.gst_india.overrides import transaction
+transaction.validate_transaction = custom_validate_transaction
