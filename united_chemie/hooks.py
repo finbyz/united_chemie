@@ -218,6 +218,6 @@ doc_events = {
 # from united_chemie.transaction import validate_transaction as custom_validate_transaction
 # transaction.validate_transaction = custom_validate_transaction
 
-from united_chemie.transaction import validate_transaction_custom as custom_validate_transaction
+from united_chemie.transaction import custom_validate_item_wise_tax_detail
 from india_compliance.gst_india.overrides import transaction
-transaction.validate_transaction = custom_validate_transaction
+transaction.validate_item_wise_tax_detail = custom_validate_item_wise_tax_detail
