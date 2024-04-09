@@ -116,14 +116,14 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"Bill Of Entry": {
-		"validate": "united_chemie.united_chemie.doc_events.bill_of_entry.validate_taxes",	
-	},
-    # "Purchase Invoice": {
-    #     "validate": "united_chemie.transaction.validate",
-	# }
-}
+# doc_events = {
+# 	"Bill Of Entry": {
+# 		"validate": "united_chemie.united_chemie.doc_events.bill_of_entry.validate_taxes",	
+# 	},
+#     # "Purchase Invoice": {
+#     #     "validate": "united_chemie.transaction.validate",
+# 	# }
+# }
 
 # Scheduled Tasks
 # ---------------
@@ -221,3 +221,7 @@ doc_events = {
 from united_chemie.transaction import custom_validate_item_wise_tax_detail
 from india_compliance.gst_india.overrides import transaction
 transaction.validate_item_wise_tax_detail = custom_validate_item_wise_tax_detail
+
+from india_compliance.gst_india.doctype.bill_of_entry.bill_of_entry import BillofEntry
+from united_chemie.united_chemie.doc_events.bill_of_entry import validate_taxes
+BillofEntry.validate_taxes = validate_taxes
