@@ -18,6 +18,7 @@ from india_compliance.gst_india.doctype.gstin.gstin import (
     _validate_gstin_info,
     get_gstin_status,
 )
+from india_compliance.gst_india.overrides.transaction import ItemGSTDetails
 from india_compliance.gst_india.utils import (
     get_all_gst_accounts,
     get_gst_accounts_by_tax_type,
@@ -91,3 +92,49 @@ def custom_validate_item_wise_tax_detail(doc, gst_accounts):
                 #     ).format(row.idx, tax_amount, bold(item_name))
                 # )
         # FINBYZ CHANGES END    
+def get_item_tax_detail(self, item):
+    """
+    - get item_tax_detail as it is if
+        - only one row exists for same item
+        - it is the last item
+
+    - If count is greater than 1,
+        - Manually calculate tax_amount for item
+        - Reduce item_tax_detail with
+            - tax_amount
+            - count
+    """
+    item_key = self.get_item_key(item)
+
+    item_tax_detail = self.item_tax_details.get(item_key)
+    if not item_tax_detail:
+        return {}
+
+    #FINBYZ CHAGE START TO MAINTAIN PRECISION IN SALES INVOICE TAX CALCULATION: COMMENTED BELOW LINE
+
+    # if item_tax_detail.count == 1:
+    #     return item_tax_detail
+
+    #FINBYZ CHAGES END TO MAINTAIN PRECISION IN SALES INVOICE TAX CALCULATION
+
+    item_tax_detail["count"] -= 1
+
+    # Handle rounding errors
+    response = item_tax_detail.copy()
+    for tax in GST_TAX_TYPES:
+        if (tax_rate := item_tax_detail[f"{tax}_rate"]) == 0:
+            continue
+
+        tax_amount_field = f"{tax}_amount"
+        precision = self.precision.get(tax_amount_field)
+
+        multiplier = (
+            item.qty if tax == "cess_non_advol" else item.taxable_value / 100
+        )
+        tax_amount = flt(tax_rate * multiplier, precision)
+
+        item_tax_detail[tax_amount_field] -= tax_amount
+
+        response.update({tax_amount_field: tax_amount})
+
+    return response

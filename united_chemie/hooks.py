@@ -124,7 +124,11 @@ app_license = "MIT"
 #     #     "validate": "united_chemie.transaction.validate",
 # 	# }
 # }
-
+doc_events = {
+    "Sales Invoice": {
+        "before_save": "united_chemie.united_chemie.doc_events.sales_invoice.validate"
+    }
+}
 # Scheduled Tasks
 # ---------------
 
@@ -225,3 +229,7 @@ transaction.validate_item_wise_tax_detail = custom_validate_item_wise_tax_detail
 from india_compliance.gst_india.doctype.bill_of_entry.bill_of_entry import BillofEntry
 from united_chemie.united_chemie.doc_events.bill_of_entry import validate_taxes
 BillofEntry.validate_taxes = validate_taxes
+
+from india_compliance.gst_india.overrides.transaction import ItemGSTDetails
+from united_chemie.transaction import get_item_tax_detail
+ItemGSTDetails.get_item_tax_detail = get_item_tax_detail
