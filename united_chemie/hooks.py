@@ -124,11 +124,7 @@ app_license = "MIT"
 #     #     "validate": "united_chemie.transaction.validate",
 # 	# }
 # }
-doc_events = {
-    "Sales Invoice": {
-        "before_save": "united_chemie.united_chemie.doc_events.sales_invoice.validate"
-    }
-}
+
 # Scheduled Tasks
 # ---------------
 
