@@ -55,9 +55,9 @@ def validate_taxes(self):
             [input_accounts.cess_non_advol_account], tax
         )
         #FinByz Changes Start
-        # if tax.charge_type == "Actual":
+        if tax.charge_type == "Actual":
 
-        #     item_wise_tax_rates = json.loads(tax.item_wise_tax_rates)
+            item_wise_tax_rates = json.loads(tax.item_wise_tax_rates)
         #     if not item_wise_tax_rates:
         #         frappe.throw(
         #             _(
@@ -67,11 +67,11 @@ def validate_taxes(self):
         #             title=_("Invalid Charge Type"),
         #         )
 
-        #     # validating total tax
-        #     total_tax = 0
-        #     for item, rate in item_wise_tax_rates.items():
-        #         item_taxable_value = taxable_value_map.get(item, 0)
-        #         total_tax += item_taxable_value * rate / 100
+            # validating total tax
+            total_tax = 0
+            for item, rate in item_wise_tax_rates.items():
+                item_taxable_value = taxable_value_map.get(item, 0)
+                total_tax += item_taxable_value * rate / 100
 
         #     tax_difference = abs(total_tax - tax.tax_amount)
 
@@ -83,3 +83,25 @@ def validate_taxes(self):
         #             ).format(row.idx, tax.tax_amount)
         #         )
         #FinByz Changes End
+
+def set_total_taxes(self):
+        total_taxes = 0
+
+        round_off_accounts = get_round_off_applicable_accounts(self.company, [])
+        for tax in self.taxes:
+            if tax.charge_type == "Actual":
+                tax.tax_amount = tax.tax_amount or 0
+                total_taxes += tax.tax_amount
+                continue
+
+            tax.tax_amount = self.get_tax_amount(
+                tax.item_wise_tax_rates, tax.charge_type
+            )
+
+            if tax.account_head in round_off_accounts:
+                tax.tax_amount = round(tax.tax_amount, 0)
+
+            total_taxes += tax.tax_amount
+            tax.total = self.total_taxable_value + total_taxes
+
+        self.total_taxes = total_taxes
