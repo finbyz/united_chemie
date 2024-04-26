@@ -228,5 +228,8 @@ BillofEntry.validate_taxes = validate_taxes
 BillofEntry.set_total_taxes = set_total_taxes
 
 from india_compliance.gst_india.overrides.transaction import ItemGSTDetails
-from united_chemie.transaction import get_item_tax_detail
-ItemGSTDetails.get_item_tax_detail = get_item_tax_detail
+from united_chemie.transaction import get_, get_item_tax_detail_, set_item_wise_tax_details_, update_item_tax_details_
+ItemGSTDetails.get = get_
+ItemGSTDetails.get_item_tax_detail = get_item_tax_detail_
+ItemGSTDetails.set_item_wise_tax_details = set_item_wise_tax_details_
+ItemGSTDetails.update_item_tax_details = update_item_tax_details_

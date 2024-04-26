@@ -92,7 +92,105 @@ def custom_validate_item_wise_tax_detail(doc, gst_accounts):
                 #     ).format(row.idx, tax_amount, bold(item_name))
                 # )
         # FINBYZ CHANGES END    
-def get_item_tax_detail(self, item):
+
+def get_(self, docs, doctype, company):
+    """
+    Return Item GST Details for a list of documents
+    """
+    self.set_gst_accounts_and_item_defaults(doctype, company)
+    self.set_tax_amount_precisions(doctype)
+
+    response = frappe._dict()
+
+    if not self.gst_account_map:
+        return response
+
+    for doc in docs:
+        self.doc = doc
+        if not doc.get("items") or not doc.get("taxes"):
+            continue
+
+        self.set_item_wise_tax_details()
+
+        max_idx = 0
+        if idxs := [item.idx for item in self.doc.get("items")]:
+            max_idx = max(idxs)
+
+        for item in doc.get("items"):
+            response[item.name] = self.get_item_tax_detail(item, max_idx)
+
+    return response
+
+def set_item_wise_tax_details_(self):
+    """
+    Item Tax Details complied
+    Example:
+    {
+        "Item Code 1": {
+            "count": 2,
+            "cgst_rate": 9,
+            "cgst_amount": 18,
+            "sgst_rate": 9,
+            "sgst_amount": 18,
+            ...
+        },
+        ...
+    }
+
+    Possible Exceptions Handled:
+    - There could be more than one row for same account
+    - Item count added to handle rounding errors
+    """
+
+    tax_details = frappe._dict()
+
+    for row in self.doc.get("items"):
+        key = row.item_code or row.item_name
+        if key not in tax_details:
+            tax_details[key] = self.item_defaults.copy()
+        tax_details[key]["count"] += 1
+
+    for row in self.doc.taxes:
+        if (
+            not row.tax_amount
+            or not row.item_wise_tax_detail
+            or row.account_head not in self.gst_account_map
+        ):
+            continue
+
+        account_type = self.gst_account_map[row.account_head]
+        tax = account_type[:-8]
+        tax_rate_field = f"{tax}_rate"
+        tax_amount_field = f"{tax}_amount"
+
+        old = json.loads(row.item_wise_tax_detail)
+        base_tax_amount = flt(row.base_tax_amount, 2)
+
+        # update item taxes
+        for idx, item_name in enumerate(old):
+            if item_name not in tax_details:
+                # Do not compute if Item is not present in Item table
+                # There can be difference in Item Table and Item Wise Tax Details
+                continue
+
+            item_taxes = tax_details[item_name]
+            tax_rate, tax_amount = old[item_name]
+
+            tax_amount = flt(tax_amount, 2)
+            base_tax_amount = flt(base_tax_amount - tax_amount, 2)
+
+            # cases when charge type == "Actual"
+            if tax_amount and not tax_rate:
+                continue
+
+            item_taxes[tax_rate_field] = tax_rate
+            item_taxes[tax_amount_field] += tax_amount
+        
+        item_taxes[tax_amount_field] += base_tax_amount
+
+    self.item_tax_details = tax_details
+
+def get_item_tax_detail_(self, item, max_idx=0):
     """
     - get item_tax_detail as it is if
         - only one row exists for same item
@@ -133,8 +231,19 @@ def get_item_tax_detail(self, item):
         )
         tax_amount = flt(tax_rate * multiplier, precision)
 
+        if item.idx == max_idx:
+            tax_amount = item_tax_detail[tax_amount_field]
+
         item_tax_detail[tax_amount_field] -= tax_amount
 
         response.update({tax_amount_field: tax_amount})
 
     return response
+
+def update_item_tax_details_(self):
+    max_idx = 0
+    if idxs := [item.idx for item in self.doc.get("items")]:
+        max_idx = max(idxs)
+    
+    for item in self.doc.get("items"):
+        item.update(self.get_item_tax_detail(item, max_idx))
