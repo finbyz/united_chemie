@@ -108,9 +108,10 @@ app_license = "MIT"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	# "ToDo": "custom_app.overrides.CustomToDo",
+    "Payment Entry": "united_chemie.united_chemie.override.override_doctype_class.payment_entry.PaymentEntry"
+}
 
 # Document Events
 # ---------------
