@@ -117,14 +117,16 @@ override_doctype_class = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"Bill Of Entry": {
-# 		"validate": "united_chemie.united_chemie.doc_events.bill_of_entry.validate_taxes",	
-# 	},
-#     # "Purchase Invoice": {
-#     #     "validate": "united_chemie.transaction.validate",
-# 	# }
-# }
+doc_events = {
+	"Work Order": {
+		"validate": "united_chemie.united_chemie.doc_events.work_order.validate",
+        "on_submit": "united_chemie.united_chemie.doc_events.work_order.on_submit",
+        "onload": "united_chemie.united_chemie.doc_events.work_order.onload",
+	},
+    # "Purchase Invoice": {
+    #     "validate": "united_chemie.transaction.validate",
+	# }
+}
 
 # Scheduled Tasks
 # ---------------
