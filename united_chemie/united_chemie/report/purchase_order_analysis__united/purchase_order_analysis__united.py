@@ -42,12 +42,15 @@ def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	pi = frappe.qb.DocType("Purchase Invoice")
 
 	query = (
 		frappe.qb.from_(po)
 		.from_(po_item)
 		.left_join(pi_item)
 		.on(pi_item.po_detail == po_item.name)
+		.left_join(pi)
+		.on(pi.name == pi_item.parent)
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -71,7 +74,7 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where(
-			(po_item.parent == po.name) & (po.status.notin(("Stopped",))) & (po.docstatus == 1)
+			(po_item.parent == po.name) & (po.status.notin(("Stopped",))) & (po.docstatus == 1) & (pi.docstatus == 1)
 		)
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
