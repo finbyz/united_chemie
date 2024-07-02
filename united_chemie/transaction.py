@@ -170,6 +170,7 @@ def set_item_wise_tax_details_(self):
         old = json.loads(row.item_wise_tax_detail)
 
         tax_difference = row.base_tax_amount_after_discount_amount
+        base_tax_amount = flt(row.base_tax_amount, 2)
 
         # update item taxes
         for idx, item_name in enumerate(old):
