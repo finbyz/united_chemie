@@ -13,11 +13,6 @@ from india_compliance.gst_india.constants import (
     STATE_NUMBERS,
 )
 from india_compliance.gst_india.constants.custom_fields import E_WAYBILL_INV_FIELDS
-from india_compliance.gst_india.doctype.gstin.gstin import (
-    _validate_gst_transporter_id_info,
-    _validate_gstin_info,
-    get_gstin_status,
-)
 from india_compliance.gst_india.overrides.transaction import ItemGSTDetails
 from india_compliance.gst_india.utils import (
     get_all_gst_accounts,
