@@ -157,19 +157,19 @@ def set_item_wise_tax_details_(self):
 
     for row in self.doc.taxes:
         if (
-            not row.tax_amount
+            not row.base_tax_amount_after_discount_amount
+            or row.gst_tax_type not in GST_TAX_TYPES
             or not row.item_wise_tax_detail
-            or row.account_head not in self.gst_account_map
         ):
             continue
 
-        account_type = self.gst_account_map[row.account_head]
-        tax = account_type[:-8]
+        tax = row.gst_tax_type
         tax_rate_field = f"{tax}_rate"
         tax_amount_field = f"{tax}_amount"
 
         old = json.loads(row.item_wise_tax_detail)
-        base_tax_amount = flt(row.base_tax_amount, 2)
+
+        tax_difference = row.base_tax_amount_after_discount_amount
 
         # update item taxes
         for idx, item_name in enumerate(old):
@@ -184,6 +184,8 @@ def set_item_wise_tax_details_(self):
             tax_amount = flt(tax_amount, 2)
             base_tax_amount = flt(base_tax_amount - tax_amount, 2)
 
+            tax_difference -= tax_amount
+
             # cases when charge type == "Actual"
             if tax_amount and not tax_rate:
                 continue
@@ -192,6 +194,13 @@ def set_item_wise_tax_details_(self):
             item_taxes[tax_amount_field] += tax_amount
         
         item_taxes[tax_amount_field] += base_tax_amount
+
+        # Floating point errors
+        tax_difference = flt(tax_difference, 5)
+
+        # Handle rounding errors
+        if tax_difference:
+            item_taxes[tax_amount_field] += tax_difference
 
     self.item_tax_details = tax_details
 
