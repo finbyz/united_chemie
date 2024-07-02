@@ -43,25 +43,27 @@ DOCTYPES_WITH_GST_DETAIL = {
     "POS Invoice",
 }
 
-def custom_validate_item_wise_tax_detail(doc, gst_accounts):
+def validate_item_wise_tax_detail(doc):
     if doc.doctype not in DOCTYPES_WITH_GST_DETAIL:
         return
 
     item_taxable_values = defaultdict(float)
+    item_qty_map = defaultdict(float)
 
     for row in doc.items:
         item_key = row.item_code or row.item_name
         item_taxable_values[item_key] += row.taxable_value
+        item_qty_map[item_key] += row.qty
 
     for row in doc.taxes:
-        if row.account_head not in gst_accounts:
+        if not row.gst_tax_type:
             continue
 
         if row.charge_type != "Actual":
             continue
 
         item_wise_tax_detail = frappe.parse_json(row.item_wise_tax_detail or "{}")
-        # FINBYZ CHANGES START WE HAVE OVERRIDED THIS FUNCTION FROM INDIA COMPLIANCE TO STOP THROW WHEN WE ADD ADD TAXES MANUALLY IN ACTUAL MODE
+
         for item_name, (tax_rate, tax_amount) in item_wise_tax_detail.items():
             if tax_amount and not tax_rate:
                 pass
@@ -75,18 +77,26 @@ def custom_validate_item_wise_tax_detail(doc, gst_accounts):
 
             # Sales Invoice is created with manual tax amount. So, when a sales return is created,
             # the tax amount is not recalculated, causing the issue.
-            item_taxable_value = item_taxable_values.get(item_name, 0)
-            tax_difference = abs(item_taxable_value * tax_rate / 100 - tax_amount)
+
+            is_cess_non_advol = "cess_non_advol" in row.gst_tax_type
+            multiplier = (
+                item_qty_map.get(item_name, 0)
+                if is_cess_non_advol
+                else item_taxable_values.get(item_name, 0) / 100
+            )
+            tax_difference = abs(multiplier * tax_rate - tax_amount)
 
             if tax_difference > 1:
-                pass
+                correct_charge_type = (
+                    "On Item Quantity" if is_cess_non_advol else "On Net Total"
+                )
+
                 # frappe.throw(
                 #     _(
                 #         "Tax Row #{0}: Charge Type is set to Actual. However, Tax Amount {1} as computed for Item {2}"
-                #         " is incorrect. Try setting the Charge Type to On Net Total."
-                #     ).format(row.idx, tax_amount, bold(item_name))
-                # )
-        # FINBYZ CHANGES END    
+                #         " is incorrect. Try setting the Charge Type to {3}"
+                #     ).format(row.idx, tax_amount, bold(item_name), correct_charge_type)
+                # )   
 
 def get_(self, docs, doctype, company):
     """
