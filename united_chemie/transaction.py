@@ -43,7 +43,7 @@ DOCTYPES_WITH_GST_DETAIL = {
     "POS Invoice",
 }
 
-def custom_validate_item_wise_tax_detail(doc): 
+def custom_validate_item_wise_tax_detail(doc):
     if doc.doctype not in DOCTYPES_WITH_GST_DETAIL:
         return
 
