@@ -123,6 +123,9 @@ doc_events = {
         "on_submit": "united_chemie.united_chemie.doc_events.work_order.on_submit",
         "onload": "united_chemie.united_chemie.doc_events.work_order.onload",
 	},
+    "Sales Invoice": {
+        "before_save": "united_chemie.united_chemie.doc_events.sales_invoice.before_save",
+    },
     # "Purchase Invoice": {
     #     "validate": "united_chemie.transaction.validate",
 	# }
@@ -236,3 +239,15 @@ ItemGSTDetails.get = get_
 ItemGSTDetails.get_item_tax_detail = get_item_tax_detail_
 ItemGSTDetails.set_item_wise_tax_details = set_item_wise_tax_details_
 ItemGSTDetails.update_item_tax_details = update_item_tax_details_
+
+
+fixtures = [
+       {
+         "dt": "Custom Field", 
+         "filters":[["module", "in", ['United Chemie']]]
+      },
+      {
+            "dt": "Property Setter",
+            "filters":[["module", "in", ['United Chemie']]]
+      }
+]
