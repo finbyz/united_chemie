@@ -18,11 +18,7 @@ from india_compliance.gst_india.overrides.ineligible_itc import (
     update_regional_gl_entries,
     update_valuation_rate,
 )
-from india_compliance.gst_india.overrides.transaction import (
-    ItemGSTDetails,
-    ItemGSTTreatment,
-    validate_charge_type_for_cess_non_advol_accounts,
-)
+from india_compliance.gst_india.overrides.transaction import GSTAccounts
 from india_compliance.gst_india.utils import get_gst_accounts_by_type
 
 
@@ -51,7 +47,7 @@ def validate_taxes(self):
                 ).format(tax.idx)
             )
 
-        validate_charge_type_for_cess_non_advol_accounts(
+        GSTAccounts.validate_charge_type_for_cess_non_advol_accounts(
             [input_accounts.cess_non_advol_account], tax
         )
         #FinByz Changes Start
