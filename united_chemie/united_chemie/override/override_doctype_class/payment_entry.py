@@ -12,9 +12,7 @@ class PaymentEntry(_PaymentEntry):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		order_amount = self.get_order_net_total()
-
-		net_total = flt(order_amount) + flt(self.unallocated_amount)
+		net_total = self.calculate_tax_withholding_net_total()
 
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict(
