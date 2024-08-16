@@ -14,5 +14,21 @@
   "property_type": "Small Text",
   "row_name": null,
   "value": "marks_and_no_template.marks_and_no"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "rex_declaration",
+  "is_system_generated": 0,
+  "modified": "2024-08-16 17:02:08.866854",
+  "module": "United Chemie",
+  "name": "Sales Invoice-rex_declaration-fetch_if_empty",
+  "property": "fetch_if_empty",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
  }
 ]
