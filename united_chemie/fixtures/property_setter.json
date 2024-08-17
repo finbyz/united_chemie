@@ -21,14 +21,30 @@
   "docstatus": 0,
   "doctype": "Property Setter",
   "doctype_or_field": "DocField",
-  "field_name": "rex_declaration",
+  "field_name": "marks_and_no",
   "is_system_generated": 0,
-  "modified": "2024-08-16 17:02:08.866854",
+  "modified": "2024-08-17 12:13:09.558375",
   "module": "United Chemie",
-  "name": "Sales Invoice-rex_declaration-fetch_if_empty",
+  "name": "Sales Invoice-marks_and_no-fetch_if_empty",
   "property": "fetch_if_empty",
   "property_type": "Check",
   "row_name": null,
   "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "rex_declaration",
+  "is_system_generated": 0,
+  "modified": "2024-08-17 12:12:30.737636",
+  "module": "United Chemie",
+  "name": "Sales Invoice-rex_declaration-default",
+  "property": "default",
+  "property_type": "Small Text",
+  "row_name": null,
+  "value": "THE EXPORTER INREX0888006110EC004 OF THE PRODUCTS COVERED BY THIS DOCUMENT DECLARES THAT, EXCEPT WHERE OTHERWISE\nCLEARLY INDICATED, THESE PRODUCTS ARE OF INDIAN PREFERENTIAL ORIGIN; ACCORDING TO RULES OF ORIGIN OF THE GENERALIZED SYSTEM OF PREFERENCES OF THE EUROPEAN UNION AND THAT THE ORIGIN CRITERION MET IS \"W-32.04\"- DT. 31.07.2024\nR.B.I Code No. : AU 120004\nImport Export Code No. : 0888006110"
  }
 ]
