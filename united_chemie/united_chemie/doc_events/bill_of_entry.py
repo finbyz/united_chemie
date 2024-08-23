@@ -47,9 +47,7 @@ def validate_taxes(self):
                 ).format(tax.idx)
             )
 
-        GSTAccounts.validate_charge_type_for_cess_non_advol_accounts(
-            [input_accounts.cess_non_advol_account], tax
-        )
+        GSTAccounts.validate_charge_type_for_cess_non_advol_accounts(tax)
         #FinByz Changes Start
         if tax.charge_type == "Actual":
 
