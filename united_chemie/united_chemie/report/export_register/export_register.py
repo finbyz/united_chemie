@@ -40,8 +40,8 @@ def get_columns():
         {"label":"DUE DATE","fieldname":"due_date", "fieldtype":"Date", "width":120},
         {"label":"FOB VALUE AS PER BRC", "fieldname":"fob_value_as_per_brc" ,"fieldtype":"Data","width":120},
         {"label":"BANK REF.NO.","fieldname":"bank_reference_number", "width":120},
-        {"label":"RECEIPT DATE(BRC)","fieldname":"payment_receipt_date", "fieldtype":"Date", "width":120},	
-        {"label": "RECEIVED AMOUNT(payment)", "fieldname": "total_payment_receipt","width": 120},
+        {"label":"RECEIPT DATE(BRC)","fieldname":"payment_date", "fieldtype":"Date", "width":120},	
+        {"label": "RECEIVED AMOUNT(payment)", "fieldname": "paid_amount","width": 120},
         {"label": "IRM NUMBER", "fieldname": "irm_number","width": 100},
         {"label": "BRC NUMBER", "fieldname": "brc_number", "width": 100},
         {"label": "BRC DATE", "fieldname": "brc_date", "fieldtype": "Date", "width": 100},
@@ -91,7 +91,7 @@ def get_data(filters):
             si.bl_no,si.bl_date,si.egm_number,si.egm_date,si.pss_sent_dt,si.base_total,si.port_of_loading,si.port_of_discharge,si.port_of_loading,
             si.country_of_destination,si.base_freight,si.base_insurance,si.total_fob_value,si.po_date,si.po_setteled_against_inv_no,si.pss_approval_date,si.etd_factory_date,si.etd_port_date,si.remarks,
             sii.item_name,sii.qty,ROUND(sii.rate,4) AS rate,sii.amount,
-            brc.brc_number,brc.brc_date,brc.payment_receipt_date,ROUND(brc.total_payment_receipt,2) AS total_payment_receipt,brc.irm_number,
+            brc.brc_number,brc.brc_date,brcp.payment_date,ROUND(brcp.paid_amount,2) AS paid_amount,brc.irm_number,
             so.consignee_order_no,so.consignee_order_date,(ROUND((si.freight - si.insurance) * si.conversion_rate, 2)) AS fob_value_as_per_brc
         FROM
             `tabSales Invoice` si
@@ -99,6 +99,8 @@ def get_data(filters):
             `tabSales Invoice Item` sii ON si.name = sii.parent
         LEFT JOIN
             `tabBRC Management` brc ON si.name = brc.invoice_no
+        LEFT JOIN
+            `tabBRC Payment` brcp ON brc.name = brcp.parent 
         LEFT JOIN
             `tabSales Order` so ON sii.sales_order = so.name
         WHERE
