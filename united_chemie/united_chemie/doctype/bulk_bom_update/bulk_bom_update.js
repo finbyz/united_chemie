@@ -28,7 +28,22 @@ frappe.ui.form.on('Bulk BOM Update', {
 		} else {
 			frappe.msgprint("Please select either Item Code or Item Group.");
 		}
-	}	
+	},
+	item_code: function(frm) {
+        let item_code = frm.doc.item_code;
+
+        frm.set_value('bom_details', []); 
+
+        frm.fields_dict['bom_details'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+            return {
+                filters: [
+                    ['BOM', 'item', '=', item_code],   
+                    ['BOM', 'is_active', '=', 1], 
+                    ['BOM', 'is_default', '=', 1]
+                ]
+            };
+        };
+    },	
 });
 
 frappe.ui.form.on("BOM Additional Cost", {
