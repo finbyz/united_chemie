@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "item_code",
   "item_group",
   "fetch_details",
@@ -19,7 +20,8 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "label": "Item code",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "item_group",
@@ -53,12 +55,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-28 09:43:44.044432",
+ "modified": "2024-10-30 16:07:48.582745",
  "modified_by": "Administrator",
  "module": "United Chemie",
  "name": "Bulk BOM Update",
