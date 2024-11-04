@@ -20,8 +20,7 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "label": "Item code",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "item_group",
@@ -68,7 +67,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-30 16:07:48.582745",
+ "modified": "2024-11-04 09:38:14.252851",
  "modified_by": "Administrator",
  "module": "United Chemie",
  "name": "Bulk BOM Update",
