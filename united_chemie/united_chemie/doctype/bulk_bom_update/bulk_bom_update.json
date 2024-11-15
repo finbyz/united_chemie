@@ -12,6 +12,7 @@
   "item_group",
   "fetch_details",
   "bom_details",
+  "fetch_additional_cost",
   "additional_cost",
   "amended_from"
  ],
@@ -62,12 +63,17 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "fetch_additional_cost",
+   "fieldtype": "Button",
+   "label": "Fetch Additional Cost"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-04 09:38:14.252851",
+ "modified": "2024-11-15 13:20:22.045138",
  "modified_by": "Administrator",
  "module": "United Chemie",
  "name": "Bulk BOM Update",

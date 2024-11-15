@@ -13,7 +13,10 @@ from chemical.chemical.doc_events.bom import cost_calculation
 from chemical.chemical.doc_events.bom import upadte_item_price
 
 class BulkBOMUpdate(Document):
-    
+    def validate(self):
+        if self.additional_cost:
+            for row in self.additional_cost:
+               row.amount = flt(row.qty) * flt(row.rate)
     @frappe.whitelist()
     def get_bom_details(self,item_code=None, item_group=None):
         conditions = []
@@ -35,7 +38,7 @@ class BulkBOMUpdate(Document):
                 b.name AS bom, b.item AS item_code
             FROM `tabBOM` AS b
             JOIN `tabItem` AS i ON i.name = b.item
-            WHERE {condition_str} AND b.is_active = 1 AND b.company = '{company}'
+            WHERE {condition_str} AND b.is_default = 1 AND b.company = '{company}'
         """
         return frappe.db.sql(query, as_dict=True)
 
@@ -59,10 +62,24 @@ class BulkBOMUpdate(Document):
                     "amount": flt(flt(cost.qty) * flt(cost.rate)),
                 })
 
-            
             bom_doc.flags.ignore_validate_update_after_submit = True
             bom_doc.save()
 
             frappe.msgprint(_("Additional costs added to BOM {0}").format(bom_detail.bom))
             update_bom_cost(bom_doc.name)
             cost_calculation(bom_doc)
+
+@frappe.whitelist()
+def get_bom_additional_costs(bom_name): 
+    additional_cost_query = f"""
+        SELECT
+            description,
+            qty,
+            uom,
+            rate,
+            (qty * rate) AS amount
+        FROM `tabBOM Additional Cost`
+        WHERE parent = '{bom_name}'
+    """
+    additional_costs = frappe.db.sql(additional_cost_query, as_dict=True)
+    return additional_costs
