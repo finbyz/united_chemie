@@ -12,6 +12,7 @@ def execute(filters=None):
 def get_columns():
     return [
         {"label": "INVOICE NUMBER", "fieldname": "invoice_no", "fieldtype": "Link", "options": "Sales Invoice", "width": 120},
+        {"label": "SALES ORDER NUMBER", "fieldname": "sales_order", "fieldtype": "Link", "options": "Sales Order", "width": 120},
         {"label": "INVOICE DATE", "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
         {"label": "CONSIGNEE NAME", "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
         {"label": "PURCHASE ORDER NUMBER", "fieldname": "po_no", "fieldtype": "Data", "width": 150},
@@ -90,7 +91,7 @@ def get_data(filters):
             ROUND(si.total_meis,2) AS total_meis,si.insurance_policy_number,ROUND(si.insurance_premium_amount,2) AS insurance_premium_amount,si.etd_destination_date,
             si.bl_no,si.bl_date,si.egm_number,si.egm_date,si.pss_sent_dt,si.base_total,si.port_of_loading,si.port_of_discharge,si.port_of_loading,
             si.country_of_destination,si.base_freight,si.base_insurance,si.total_fob_value,si.po_date,si.po_setteled_against_inv_no,si.pss_approval_date,si.etd_factory_date,si.etd_port_date,si.remarks,
-            sii.item_name,sii.qty,ROUND(sii.rate,4) AS rate,sii.amount,
+            sii.item_name,sii.sales_order,sii.qty,ROUND(sii.rate,4) AS rate,sii.amount,
             brc.brc_number,brc.brc_date,brcp.payment_date,ROUND(brcp.paid_amount,2) AS paid_amount,brc.irm_number,
             so.consignee_order_no,so.consignee_order_date,(ROUND((si.freight - si.insurance) * si.conversion_rate, 2)) AS fob_value_as_per_brc
         FROM
