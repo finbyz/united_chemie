@@ -49,6 +49,7 @@ frappe.ui.form.on('Bulk BOM Update', {
                     r.message.forEach((element) => {
                         let cost_entry = frm.add_child("additional_cost");
                         cost_entry.description = element.description;
+                        cost_entry.account = element.account;
                         cost_entry.qty = element.qty;
                         cost_entry.uom = element.uom;
                         cost_entry.rate = element.rate;

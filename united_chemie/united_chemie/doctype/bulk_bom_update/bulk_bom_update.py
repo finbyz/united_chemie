@@ -56,6 +56,7 @@ class BulkBOMUpdate(Document):
             for cost in self.additional_cost:
                 bom_doc.append("additional_cost", {
                     "description": cost.description,
+                    "account":cost.account,
                     "qty": cost.qty,
                     "uom": cost.uom,
                     "rate": cost.rate,
@@ -74,6 +75,7 @@ def get_bom_additional_costs(bom_name):
     additional_cost_query = f"""
         SELECT
             description,
+            account,
             qty,
             uom,
             rate,
