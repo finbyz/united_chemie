@@ -69,6 +69,19 @@ def execute(filters=None):
 
 		data.append(sle)
 
+		if sle.actual_qty >= 0 :
+			sle.inward_qty = sle.actual_qty
+			sle.outward_qty = 0
+			sle.inward_value = sle.stock_value_difference
+			sle.outward_rate = 0
+			sle.outward_amt = 0
+		elif sle.actual_qty < 0:
+			sle.outward_qty = abs(sle.actual_qty)
+			sle.inward_qty = 0
+			sle.inward_value = 0
+			sle.outward_rate = abs(sle.stock_value_difference / sle.outward_qty)
+			sle.outward_amt = abs(sle.stock_value_difference)
+
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 
@@ -89,11 +102,16 @@ def update_available_serial_nos(available_serial_nos, sle):
 	existing_serial_no = available_serial_nos[key]
 	for sn in serial_nos:
 		if sle.actual_qty > 0:
+			sle.inward_qty = sle.actual_qty
+			sle.inward_value = sle.stock_value_difference
 			if sn in existing_serial_no:
 				existing_serial_no.remove(sn)
 			else:
 				existing_serial_no.append(sn)
 		else:
+			sle.outward_qty = abs(sle.actual_qty)
+			sle.outward_rate = abs(sle.stock_value_difference / sle.outward_qty)
+			sle.outward_amt = abs(sle.stock_value_difference)
 			if sn in existing_serial_no:
 				existing_serial_no.remove(sn)
 			else:
@@ -149,6 +167,36 @@ def get_columns(filters):
 
 	columns.extend(
 		[
+			{
+				"label": _("Inward Qty"),
+				"fieldname": "inward_qty",
+				"fieldtype": "Float",
+				"precision": 2,
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Inward Amt"), 
+				"fieldname": "inward_value", 
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency", 
+				"convertible": "rate"},
+			{	
+				"label": _("Outward Qty"), 
+				"fieldname": "outward_qty",
+				 "fieldtype": "Float","precision": 2,
+				 "width": 90, 
+				 "convertible": "qty"
+			},
+
+			{
+				"label": _("Outward Amt"),
+				"fieldname":"outward_amt",
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency",
+				"convertible": "rate"},
 			{
 				"label": _("In Qty"),
 				"fieldname": "in_qty",
