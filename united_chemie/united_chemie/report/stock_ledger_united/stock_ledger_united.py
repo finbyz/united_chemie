@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime
+from frappe.query_builder.functions import CombineDatetime,Ifnull
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -189,7 +189,14 @@ def get_columns(filters):
 				 "width": 90, 
 				 "convertible": "qty"
 			},
-
+			{
+				"label": _("Outward Rate"),
+				 "fieldname": "outward_rate",
+				  "fieldtype": "Currency",
+				  "width": 90,
+				  "options": "Company:company:default_currency",
+				  "convertible": "rate"
+			},
 			{
 				"label": _("Outward Amt"),
 				"fieldname":"outward_amt",
@@ -250,6 +257,7 @@ def get_columns(filters):
 			},
 			{
 				"label": _("Avg Rate (Balance Stock)"),
+				# "label": _("Valuation Rate"),
 				"fieldname": "valuation_rate",
 				"fieldtype": filters.valuation_field_type,
 				"width": 180,
@@ -319,6 +327,11 @@ def get_columns(filters):
 				"options": "Company",
 				"width": 110,
 			},
+			{
+				"label": _("Particular"), 
+				"fieldname": "particular",
+		 		"fieldtype": "Data",
+		 		"width": 150}
 		]
 	)
 
@@ -328,10 +341,26 @@ def get_columns(filters):
 def get_stock_ledger_entries(filters, items):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pi = frappe.qb.DocType("Purchase Invoice")
+	dn = frappe.qb.DocType("Delivery Note")
+	si = frappe.qb.DocType("Sales Invoice")
+	se = frappe.qb.DocType("Stock Entry")
+
 	query = (
 		frappe.qb.from_(sle)
 		.join(sed)
     	.on(sle.voucher_detail_no == sed.name)  # Join on the parent Stock Entry
+		.left_join(pr)
+    	.on(pr.name == sle.voucher_no)
+    	.left_join(pi)
+    	.on(pi.name == sle.voucher_no)
+    	.left_join(dn)
+    	.on(dn.name == sle.voucher_no)
+    	.left_join(si)
+    	.on(si.name == sle.voucher_no)
+    	.left_join(se)
+    	.on(se.name == sle.voucher_no)
 		.select(
 			sle.item_code,
 			sle.posting_datetime.as_("date"),
@@ -351,7 +380,9 @@ def get_stock_ledger_entries(filters, items):
 			sle.serial_no,
 			sle.project,
 			sed.s_warehouse,
-			sed.t_warehouse
+			sed.t_warehouse,
+			Ifnull(pr.supplier,Ifnull(pi.supplier,Ifnull(dn.customer,Ifnull(si.customer,se.stock_entry_type)))).as_("particular")
+			# IFNULL(pr.supplier,IFNULL(pi.supplier,IFNULL(dn.customer,IFNULL(si.customer,se.stock_entry_type)))).as_("particular")
 		)
 		.where(
 			(sle.docstatus < 2)
