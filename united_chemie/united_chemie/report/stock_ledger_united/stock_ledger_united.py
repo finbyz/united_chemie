@@ -328,6 +328,7 @@ def get_columns(filters):
 				"options": "Company:company:default_currency",
 			},
 			{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+			{"label": _("Particular"), "fieldname": "particular", "width": 110},
 			{
 				"label": _("Voucher #"),
 				"fieldname": "voucher_no",
@@ -380,6 +381,7 @@ def get_stock_ledger_entries(filters, items):
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	se = frappe.qb.DocType("Stock Entry")
 
 	query = (
 		frappe.qb.from_(sle)
@@ -403,6 +405,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.project,
 			sed.t_warehouse,
 			sed.s_warehouse,
+			se.stock_entry_type.as_('particular'),
 		)
 		.where(
 			(sle.docstatus < 2)
@@ -411,6 +414,8 @@ def get_stock_ledger_entries(filters, items):
 		)
 		.left_join(sed)
 		.on((sle.voucher_type == "Stock Entry") & (sle.voucher_detail_no == sed.name))
+  		.left_join(se)
+		.on((sle.voucher_type == "Stock Entry") & (sle.voucher_no == se.name))
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
 	)
