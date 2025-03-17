@@ -99,6 +99,24 @@ frappe.query_reports["Stock Ledger United"] = {
 		} else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
+		else if (column.fieldname == "inward_qty" && data && data.inward_qty > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}
+		else if (column.fieldname == "incoming_rate" && data && data.incoming_rate > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}
+		else if (column.fieldname == "inward_amt" && data && data.inward_amt > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}
+		else if (column.fieldname == "outward_qty" && data && data.outward_qty > 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		}
+		else if (column.fieldname == "outward_rate" && data && data.outward_rate > 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		}
+		else if (column.fieldname == "outward_amt" && data && data.outward_amt > 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		}
 
 		return value;
 	},

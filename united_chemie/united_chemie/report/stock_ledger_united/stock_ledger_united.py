@@ -4,12 +4,16 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime,Ifnull
-from frappe.utils import cint, flt
+from frappe.query_builder.functions import CombineDatetime
+from frappe.utils import cint, flt, get_datetime
 
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+	get_inventory_dimensions,
+)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	get_stock_balance_for,
+)
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
@@ -39,7 +43,9 @@ def execute(filters=None):
 		stock_value = opening_row.get("stock_value")
 
 	available_serial_nos = {}
-	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
+	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(
+		filters
+	)
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
@@ -54,33 +60,50 @@ def execute(filters=None):
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 
-			sle.update({"qty_after_transaction": actual_qty, "stock_value": stock_value})
+			sle.update(
+				{"qty_after_transaction": actual_qty, "stock_value": stock_value}
+			)
 
-		sle.update({"in_qty": max(sle.actual_qty, 0), "out_qty": min(sle.actual_qty, 0)})
+		sle.update(
+			{"in_qty": max(sle.actual_qty, 0), "out_qty": min(sle.actual_qty, 0)}
+		)
 
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
 
 		if sle.actual_qty:
-			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
+			sle["in_out_rate"] = flt(
+				sle.stock_value_difference / sle.actual_qty, precision
+			)
 
 		elif sle.voucher_type == "Stock Reconciliation":
 			sle["in_out_rate"] = sle.valuation_rate
 
-		data.append(sle)
+		if sle.voucher_type == "Stock Entry":
+			sle["source_warehouse"] = sle["s_warehouse"]
+			sle["target_warehouse"] = sle["t_warehouse"]
 
-		if sle.actual_qty >= 0 :
+		else:
+			if sle["actual_qty"] > 0:
+				sle["target_warehouse"] = sle["warehouse"]
+
+			elif sle["actual_qty"] < 0:
+				sle["source_warehouse"] = sle["warehouse"]
+
+		if sle.actual_qty >= 0:
 			sle.inward_qty = sle.actual_qty
 			sle.outward_qty = 0
-			sle.inward_value = sle.stock_value_difference
+			sle.inward_amt = sle.stock_value_difference
 			sle.outward_rate = 0
 			sle.outward_amt = 0
 		elif sle.actual_qty < 0:
 			sle.outward_qty = abs(sle.actual_qty)
 			sle.inward_qty = 0
-			sle.inward_value = 0
+			sle.inward_amt = 0
 			sle.outward_rate = abs(sle.stock_value_difference / sle.outward_qty)
 			sle.outward_amt = abs(sle.stock_value_difference)
+
+		data.append(sle)
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
@@ -96,22 +119,21 @@ def update_available_serial_nos(available_serial_nos, sle):
 		stock_balance = get_stock_balance_for(
 			sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time
 		)
-		serials = get_serial_nos(stock_balance["serial_nos"]) if stock_balance["serial_nos"] else []
+		serials = (
+			get_serial_nos(stock_balance["serial_nos"])
+			if stock_balance["serial_nos"]
+			else []
+		)
 		available_serial_nos.setdefault(key, serials)
 
 	existing_serial_no = available_serial_nos[key]
 	for sn in serial_nos:
 		if sle.actual_qty > 0:
-			sle.inward_qty = sle.actual_qty
-			sle.inward_value = sle.stock_value_difference
 			if sn in existing_serial_no:
 				existing_serial_no.remove(sn)
 			else:
 				existing_serial_no.append(sn)
 		else:
-			sle.outward_qty = abs(sle.actual_qty)
-			sle.outward_rate = abs(sle.stock_value_difference / sle.outward_qty)
-			sle.outward_amt = abs(sle.stock_value_difference)
 			if sn in existing_serial_no:
 				existing_serial_no.remove(sn)
 			else:
@@ -122,7 +144,12 @@ def update_available_serial_nos(available_serial_nos, sle):
 
 def get_columns(filters):
 	columns = [
-		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
+		{
+			"label": _("Date"),
+			"fieldname": "date",
+			"fieldtype": "Datetime",
+			"width": 150,
+		},
 		{
 			"label": _("Item"),
 			"fieldname": "item_code",
@@ -136,20 +163,6 @@ def get_columns(filters):
 			"fieldname": "stock_uom",
 			"fieldtype": "Link",
 			"options": "UOM",
-			"width": 90,
-		},
-		{
-			"label": _("Source Warehouse"),
-			"fieldname": "s_warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"width": 90,
-		},
-		{
-			"label": _("Target Warehouse"),
-			"fieldname": "t_warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
 			"width": 90,
 		},
 	]
@@ -168,43 +181,6 @@ def get_columns(filters):
 	columns.extend(
 		[
 			{
-				"label": _("Inward Qty"),
-				"fieldname": "inward_qty",
-				"fieldtype": "Float",
-				"precision": 2,
-				"width": 80,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Inward Amt"), 
-				"fieldname": "inward_value", 
-				"fieldtype": "Currency",
-				"width": 90,
-				"options": "Company:company:default_currency", 
-				"convertible": "rate"},
-			{	
-				"label": _("Outward Qty"), 
-				"fieldname": "outward_qty",
-				 "fieldtype": "Float","precision": 2,
-				 "width": 90, 
-				 "convertible": "qty"
-			},
-			{
-				"label": _("Outward Rate"),
-				 "fieldname": "outward_rate",
-				  "fieldtype": "Currency",
-				  "width": 90,
-				  "options": "Company:company:default_currency",
-				  "convertible": "rate"
-			},
-			{
-				"label": _("Outward Amt"),
-				"fieldname":"outward_amt",
-				"fieldtype": "Currency",
-				"width": 90,
-				"options": "Company:company:default_currency",
-				"convertible": "rate"},
-			{
 				"label": _("In Qty"),
 				"fieldname": "in_qty",
 				"fieldtype": "Float",
@@ -219,6 +195,54 @@ def get_columns(filters):
 				"convertible": "qty",
 			},
 			{
+				"label": _("Inward Qty"),
+				"fieldname": "inward_qty",
+				"fieldtype": "Float",
+				"precision": 2,
+				"width": 90,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Incoming Rate"),
+				"fieldname": "incoming_rate",
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Inward Amt"),
+				"fieldname": "inward_amt",
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Outward Qty"),
+				"fieldname": "outward_qty",
+				"fieldtype": "Float",
+				"precision": 2,
+				"width": 90,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Outward Rate"),
+				"fieldname": "outward_rate",
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Outward Amt"),
+				"fieldname": "outward_amt",
+				"fieldtype": "Currency",
+				"width": 90,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
 				"label": _("Balance Qty"),
 				"fieldname": "qty_after_transaction",
 				"fieldtype": "Float",
@@ -228,6 +252,20 @@ def get_columns(filters):
 			{
 				"label": _("Warehouse"),
 				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 150,
+			},
+			{
+				"label": _("Target Warehouse"),
+				"fieldname": "target_warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 150,
+			},
+			{
+				"label": _("Source Warehouse"),
+				"fieldname": "source_warehouse",
 				"fieldtype": "Link",
 				"options": "Warehouse",
 				"width": 150,
@@ -257,7 +295,6 @@ def get_columns(filters):
 			},
 			{
 				"label": _("Avg Rate (Balance Stock)"),
-				# "label": _("Valuation Rate"),
 				"fieldname": "valuation_rate",
 				"fieldtype": filters.valuation_field_type,
 				"width": 180,
@@ -312,7 +349,11 @@ def get_columns(filters):
 				"options": "Serial No",
 				"width": 100,
 			},
-			{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
+			{
+				"label": _("Balance Serial No"),
+				"fieldname": "balance_serial_no",
+				"width": 100,
+			},
 			{
 				"label": _("Project"),
 				"fieldname": "project",
@@ -327,11 +368,6 @@ def get_columns(filters):
 				"options": "Company",
 				"width": 110,
 			},
-			{
-				"label": _("Particular"), 
-				"fieldname": "particular",
-		 		"fieldtype": "Data",
-		 		"width": 150}
 		]
 	)
 
@@ -339,28 +375,14 @@ def get_columns(filters):
 
 
 def get_stock_ledger_entries(filters, items):
+	from_date = get_datetime(filters.from_date + " 00:00:00")
+	to_date = get_datetime(filters.to_date + " 23:59:59")
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
-	pr = frappe.qb.DocType("Purchase Receipt")
-	pi = frappe.qb.DocType("Purchase Invoice")
-	dn = frappe.qb.DocType("Delivery Note")
-	si = frappe.qb.DocType("Sales Invoice")
-	se = frappe.qb.DocType("Stock Entry")
 
 	query = (
 		frappe.qb.from_(sle)
-		.join(sed)
-    	.on(sle.voucher_detail_no == sed.name)  # Join on the parent Stock Entry
-		.left_join(pr)
-    	.on(pr.name == sle.voucher_no)
-    	.left_join(pi)
-    	.on(pi.name == sle.voucher_no)
-    	.left_join(dn)
-    	.on(dn.name == sle.voucher_no)
-    	.left_join(si)
-    	.on(si.name == sle.voucher_no)
-    	.left_join(se)
-    	.on(se.name == sle.voucher_no)
 		.select(
 			sle.item_code,
 			sle.posting_datetime.as_("date"),
@@ -379,17 +401,17 @@ def get_stock_ledger_entries(filters, items):
 			sle.batch_no,
 			sle.serial_no,
 			sle.project,
-			sed.s_warehouse,
 			sed.t_warehouse,
-			Ifnull(pr.supplier,Ifnull(pi.supplier,Ifnull(dn.customer,Ifnull(si.customer,se.stock_entry_type)))).as_("particular")
-			# IFNULL(pr.supplier,IFNULL(pi.supplier,IFNULL(dn.customer,IFNULL(si.customer,se.stock_entry_type)))).as_("particular")
+			sed.s_warehouse,
 		)
 		.where(
 			(sle.docstatus < 2)
 			& (sle.is_cancelled == 0)
-			& (sle.posting_date[filters.from_date : filters.to_date])
+			& (sle.posting_datetime[from_date:to_date])
 		)
-		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.left_join(sed)
+		.on((sle.voucher_type == "Stock Entry") & (sle.voucher_detail_no == sed.name))
+		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
 	)
 
@@ -450,7 +472,14 @@ def get_item_details(items, sl_entries, include_uom):
 	item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(item)
-		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.item_group,
+			item.brand,
+			item.stock_uom,
+		)
 		.where(item.name.isin(items))
 	)
 
@@ -510,7 +539,8 @@ def get_opening_balance(filters, columns, sl_entries):
 		if (
 			sle.get("voucher_type") == "Stock Reconciliation"
 			and sle.posting_date == filters.from_date
-			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
+			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose")
+			== "Opening Stock"
 		):
 			last_entry = sle
 			sl_entries.remove(sle)
@@ -526,7 +556,9 @@ def get_opening_balance(filters, columns, sl_entries):
 
 
 def get_warehouse_condition(warehouse):
-	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
+	warehouse_details = frappe.db.get_value(
+		"Warehouse", warehouse, ["lft", "rgt"], as_dict=1
+	)
 	if warehouse_details:
 		return f" exists (select name from `tabWarehouse` wh \
 			where wh.lft >= {warehouse_details.lft} and wh.rgt <= {warehouse_details.rgt} and warehouse = wh.name)"
@@ -535,7 +567,9 @@ def get_warehouse_condition(warehouse):
 
 
 def get_item_group_condition(item_group, item_table=None):
-	item_group_details = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"], as_dict=1)
+	item_group_details = frappe.db.get_value(
+		"Item Group", item_group, ["lft", "rgt"], as_dict=1
+	)
 	if item_group_details:
 		if item_table:
 			ig = frappe.qb.DocType("Item Group")
