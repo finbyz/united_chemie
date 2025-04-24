@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
 from re import T
 import frappe
 from frappe import _, scrub
@@ -17,9 +18,37 @@ def execute(filters=None):
 	filters.currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 
 	gross_profit_data = GrossProfitGenerator(filters)
-
 	data = []
-
+	indirect_expence_data_account_wise = frappe.db.sql("""
+		SELECT
+			pii.indirect_expense_for_sales AS sales_invoice,
+			pii.expense_account,
+			SUM(pii.net_amount) AS expense_amount
+		FROM
+			`tabPurchase Invoice Item` AS pii
+		INNER JOIN `tabPurchase Invoice` AS pi ON pii.parent = pi.name AND pi.docstatus = 1
+		INNER JOIN `tabSales Invoice` AS si ON pii.indirect_expense_for_sales = si.name AND si.docstatus = 1
+		WHERE
+			pii.indirect_expense_for_sales IS NOT NULL
+			AND pii.indirect_expense_for_sales != ''
+			AND pi.sales_invoice IS NOT NULL
+			AND pi.sales_invoice != ''
+		GROUP BY
+			pii.indirect_expense_for_sales,
+			pii.expense_account
+	""", as_dict=1)
+	sales_invoice_expenses = defaultdict(list)
+	expence_accounts = set()
+	for row in indirect_expence_data_account_wise:
+		expence_accounts.add(row["expense_account"])
+	expence_accounts = sorted(list(expence_accounts))
+	expence_head_columns = [ { "label": account, "fieldname": scrub(account), "fieldtype": "Currency", "width": 120 } for account in expence_accounts]
+	for row in indirect_expence_data_account_wise:
+		sales_invoice_expenses[row["sales_invoice"]].append({
+			"expense_account": row["expense_account"],
+			"expense_amount": row["expense_amount"]
+		})
+	
 	group_wise_columns = frappe._dict(
 		{
 			"invoice": [
@@ -128,9 +157,8 @@ def execute(filters=None):
 			],
 		}
 	)
-
 	columns = get_columns(group_wise_columns, filters)
-
+	columns.extend(expence_head_columns)
 	if filters.group_by == "Invoice":
 		get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data)
 
@@ -138,7 +166,10 @@ def execute(filters=None):
 		get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_columns, data)
 	
 	chart_data = get_chart_data(data, filters)
-
+	for row in data:
+		expence_accounts = sales_invoice_expenses.get(row.sales_invoice, [])
+		for expense in expence_accounts:
+			row[scrub(expense["expense_account"])] = expense["expense_amount"]
 	return columns, data, None, chart_data
 
 

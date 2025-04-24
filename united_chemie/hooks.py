@@ -29,8 +29,9 @@ app_license = "MIT"
 # include js in doctype views
 doctype_js = {
     "Journal Entry" : "public/js/journal_entry.js",
-    "BOM":"public/js/bom.js"
-    }
+    "BOM":"public/js/bom.js",
+    "Asset" : "public/js/assets.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -243,6 +244,11 @@ ItemGSTDetails.get = get_
 ItemGSTDetails.get_item_tax_detail = get_item_tax_detail_
 ItemGSTDetails.set_item_wise_tax_details = set_item_wise_tax_details_
 ItemGSTDetails.update_item_tax_details = update_item_tax_details_
+
+
+from erpnext.assets.doctype.asset import asset
+from united_chemie.united_chemie.override.asset import custom_get_depreciation_amount
+asset.get_depreciation_amount = custom_get_depreciation_amount
 
 
 fixtures = [
