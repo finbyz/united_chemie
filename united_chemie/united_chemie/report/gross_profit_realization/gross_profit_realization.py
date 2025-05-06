@@ -31,8 +31,6 @@ def execute(filters=None):
 		WHERE
 			pii.indirect_expense_for_sales IS NOT NULL
 			AND pii.indirect_expense_for_sales != ''
-			AND pi.sales_invoice IS NOT NULL
-			AND pi.sales_invoice != ''
 		GROUP BY
 			pii.indirect_expense_for_sales,
 			pii.expense_account
