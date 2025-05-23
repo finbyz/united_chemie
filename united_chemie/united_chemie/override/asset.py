@@ -1,7 +1,7 @@
 import frappe
-from erpnext.assets.doctype.asset.asset import get_straight_line_or_manual_depr_amount
-from erpnext.assets.doctype.asset.asset import get_shift_depr_amount
-from erpnext.assets.doctype.asset.asset import get_wdv_or_dd_depr_amount
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import get_straight_line_or_manual_depr_amount
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import get_shift_depr_amount
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import get_wdv_or_dd_depr_amount
 
 def custom_get_depreciation_amount(
 	asset,
