@@ -10,7 +10,7 @@ from frappe.utils import flt
 # from chemical.chemical.doc_events.bom import update_bom_cost
 # from chemical.chemical.doc_events.bom import _update_bom_cost
 from chemical.chemical.doc_events.bom import cost_calculation
-from chemical.chemical.doc_events.bom import upadte_item_price
+# from chemical.chemical.doc_events.bom import upadte_item_price
 
 class BulkBOMUpdate(Document):
     def validate(self):
