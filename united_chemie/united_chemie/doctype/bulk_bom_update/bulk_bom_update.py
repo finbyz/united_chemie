@@ -7,8 +7,8 @@ from frappe.model.document import Document
 import frappe
 from frappe import _
 from frappe.utils import flt
-from chemical.chemical.doc_events.bom import update_bom_cost
-from chemical.chemical.doc_events.bom import _update_bom_cost
+# from chemical.chemical.doc_events.bom import update_bom_cost
+# from chemical.chemical.doc_events.bom import _update_bom_cost
 from chemical.chemical.doc_events.bom import cost_calculation
 from chemical.chemical.doc_events.bom import upadte_item_price
 
@@ -67,7 +67,7 @@ class BulkBOMUpdate(Document):
             bom_doc.save()
 
             frappe.msgprint(_("Additional costs added to BOM {0}").format(bom_detail.bom))
-            update_bom_cost(bom_doc.name)
+            # update_bom_cost(bom_doc.name)
             cost_calculation(bom_doc)
 
 @frappe.whitelist()
