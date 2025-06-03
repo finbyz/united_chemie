@@ -114,7 +114,8 @@ doctype_js = {
 
 override_doctype_class = {
 	# "ToDo": "custom_app.overrides.CustomToDo",
-    "Payment Entry": "united_chemie.united_chemie.override.override_doctype_class.payment_entry.PaymentEntry"
+    "Payment Entry": "united_chemie.united_chemie.override.override_doctype_class.payment_entry.PaymentEntry",
+    "Sales Order": "united_chemie.united_chemie.override.override_doctype_class.custom_sales_order.CustomSalesOrder"
 }
 
 # Document Events
