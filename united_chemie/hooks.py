@@ -247,9 +247,9 @@ ItemGSTDetails.set_item_wise_tax_details = set_item_wise_tax_details_
 ItemGSTDetails.update_item_tax_details = update_item_tax_details_
 
 
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import asset
+from erpnext.assets.doctype.asset_depreciation_schedule import asset_depreciation_schedule
 from united_chemie.united_chemie.override.asset import custom_get_depreciation_amount
-asset.get_depreciation_amount = custom_get_depreciation_amount
+asset_depreciation_schedule.get_depreciation_amount = custom_get_depreciation_amount
 
 
 fixtures = [
