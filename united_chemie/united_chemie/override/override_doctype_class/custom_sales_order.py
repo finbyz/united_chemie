@@ -1,7 +1,7 @@
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.selling.doctype.sales_order.sales_order import SalesOrder as _SalesOrder
 import frappe
 
-class CustomSalesOrder(AccountsController):
+class CustomSalesOrder(_SalesOrder):
 	def validate_party_address_and_contact(self):
 		party_type, party = self.get_party()
 
