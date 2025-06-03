@@ -15,6 +15,6 @@ class CustomSalesOrder(AccountsController):
             # elif shipping_address and shipping_address not in party_address:
             #     frappe.throw(_("Shipping Address does not belong to the {0}").format(party))
 
-    def validate(self):
-        self.validate_party_address()
-        super().validate()
+    # def validate(self):
+    #     self.validate_party_address()
+    #     super().validate()
