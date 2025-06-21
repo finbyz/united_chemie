@@ -94,7 +94,7 @@ class BallMillDataSheet(_BallMillDataSheet):
 				if row.is_finished_item:
 					finished_item.append(row)
 			for data in finished_item:
-				if data and data.batch_no:
+				if data:
 					# Fetch details from Batch
 					batch = frappe.db.get_value("Batch", finished_item.batch_no, 
 						["manufacturing_date", "expiry_date"], as_dict=True)
