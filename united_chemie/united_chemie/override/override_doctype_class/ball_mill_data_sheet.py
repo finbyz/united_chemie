@@ -96,8 +96,8 @@ class BallMillDataSheet(_BallMillDataSheet):
 			for data in finished_item:
 				if data:
 					# Fetch details from Batch
-					batch = frappe.db.get_value("Batch", finished_item.batch_no, 
-						["manufacturing_date", "expiry_date"], as_dict=True)
+					# batch = frappe.db.get_value("Batch", finished_item.batch_no, 
+					# 	["manufacturing_date", "expiry_date"], as_dict=True)
 
 					qi = frappe.new_doc("Quality Inspection")
 					qi.inspection_type = "In Process"
@@ -107,7 +107,7 @@ class BallMillDataSheet(_BallMillDataSheet):
 					qi.item_code = finished_item.item_code
 					qi.description = finished_item.description
 					qi.party_product_name = finished_item.item_name
-					qi.batch_no = finished_item.batch_no
+					# qi.batch_no = finished_item.batch_no
 					qi.report_date = self.date
 					qi.inspected_by = frappe.session.user
 					qi.status = "Accepted"  # You can set to "Pending" if needed
