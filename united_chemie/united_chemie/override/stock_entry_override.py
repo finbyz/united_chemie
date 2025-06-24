@@ -1,9 +1,10 @@
 import frappe
-
+from frappe.utils import cint
+ 
 def custom_create_quality_inspection_entry(self):
     for inspection_item in self.items:
         item = frappe.get_doc("Item", inspection_item.item_code)
-        if self.purpose == "Manufacture" or (self.purpose == "Repack" and self.from_ball_mill == 1):
+        if self.purpose == "Manufacture" or (self.purpose == "Repack" and cint(self.from_ball_mill) == 1):
             if (
                 item.inspection_required_after_stock_entry
                 and inspection_item.is_finished_item
