@@ -156,6 +156,13 @@ def execute(filters=None):
 		}
 	)
 	columns = get_columns(group_wise_columns, filters)
+	columns.append(
+		{
+			"fieldname": "total_expense",
+			"label": _("Total Expense"),
+			"fieldtype": "Currency",
+		}
+	)
 	columns.extend(expence_head_columns)
 	if filters.group_by == "Invoice":
 		get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data)
@@ -166,8 +173,11 @@ def execute(filters=None):
 	chart_data = get_chart_data(data, filters)
 	for row in data:
 		expence_accounts = sales_invoice_expenses.get(row.sales_invoice, [])
+		total_expence = 0
 		for expense in expence_accounts:
 			row[scrub(expense["expense_account"])] = expense["expense_amount"]
+			total_expence += expense["expense_amount"]
+		row["total_expense"] = total_expence
 	return columns, data, None, chart_data
 
 
@@ -787,6 +797,7 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time,
 				`tabSales Invoice`.project, `tabSales Invoice`.update_stock,
 				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group,
+				`tabSales Invoice`.conversion_rate, `tabSales Invoice`.final_destination,
 				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
 				`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
 				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group,
