@@ -101,3 +101,6 @@ class BallMillDataSheet(_BallMillDataSheet):
 			)
 			if not quality_inspection:
 				frappe.throw(_("Cannot submit because no submitted Quality Inspection exists for Stock Entry: {0}").format(self.stock_entry))
+    
+	def on_submit(self):
+		pass
