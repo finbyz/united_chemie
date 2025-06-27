@@ -86,6 +86,7 @@ class BallMillDataSheet(_BallMillDataSheet):
 				})
 
 			se.save()
+			self.db_set('stock_entry',se.name)
 			se.flags.ignore_validate = True
 	
 	def before_submit(self):
