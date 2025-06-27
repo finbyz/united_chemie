@@ -88,19 +88,10 @@ class BallMillDataSheet(_BallMillDataSheet):
 			se.save()
 			self.db_set('stock_entry',se.name)
 			se.flags.ignore_validate = True
-	
-	def before_submit(self):
-		if self.stock_entry:
-			quality_inspection = frappe.db.exists(
-				"Quality Inspection",
-				{
-					"reference_type": "Stock Entry",
-					"reference_name": self.stock_entry,
-					"docstatus": 1
-				}
-			)
-			if not quality_inspection:
-				frappe.throw(_("Cannot submit because no submitted Quality Inspection exists for Stock Entry: {0}").format(self.stock_entry))
     
 	def on_submit(self):
-		pass
+		if self.stock_entry:
+			se = frappe.get_doc("Stock Entry", self.stock_entry)
+			if se.docstatus == 0:
+				se.flags.ignore_validate = True
+				se.submit()
