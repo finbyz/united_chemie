@@ -7,7 +7,7 @@ from chemical.comments_api import creation_comment,status_change_comment,cancell
 
 
 class BallMillDataSheet(_BallMillDataSheet):
-	def on_submit(self):
+	def after_insert(self):
 		if self.get('create_stock_entry') == 0:
 			create_stock_entry = 0
 		else:
@@ -87,3 +87,16 @@ class BallMillDataSheet(_BallMillDataSheet):
 
 			se.save()
 			se.flags.ignore_validate = True
+	
+	def before_submit(self):
+		if self.stock_entry:
+			quality_inspection = frappe.db.exists(
+				"Quality Inspection",
+				{
+					"reference_type": "Stock Entry",
+					"reference_name": self.stock_entry,
+					"docstatus": 1
+				}
+			)
+			if not quality_inspection:
+				frappe.throw(_("Cannot submit because no submitted Quality Inspection exists for Stock Entry: {0}").format(self.stock_entry))
