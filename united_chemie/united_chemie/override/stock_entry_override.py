@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import cint
+from frappe.utils import get_link_to_form
  
 def custom_create_quality_inspection_entry(self):
     for inspection_item in self.items:
@@ -40,4 +41,11 @@ def custom_create_quality_inspection_entry(self):
                             inspection_item.name,
                             "quality_inspection",
                             quality_inspection.name,
+                        )
+                        frappe.msgprint(
+                            "Quality Inspection {} is Created".format(
+                                get_link_to_form(
+                                    "Quality Inspection", quality_inspection.name
+                                )
+                            )
                         )
