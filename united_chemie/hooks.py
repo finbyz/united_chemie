@@ -30,7 +30,8 @@ app_license = "MIT"
 doctype_js = {
     "Journal Entry" : "public/js/journal_entry.js",
     "BOM":"public/js/bom.js",
-    "Asset" : "public/js/assets.js"
+    "Asset" : "public/js/assets.js",
+    "Sales Invoice" : "public/js/sales_invoice.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
