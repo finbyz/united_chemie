@@ -117,7 +117,8 @@ override_doctype_class = {
 	# "ToDo": "custom_app.overrides.CustomToDo",
     "Payment Entry": "united_chemie.united_chemie.override.override_doctype_class.payment_entry.PaymentEntry",
     "Sales Order": "united_chemie.united_chemie.override.override_doctype_class.custom_sales_order.CustomSalesOrder",
-    "Ball Mill Data Sheet" : "united_chemie.united_chemie.override.override_doctype_class.ball_mill_data_sheet.BallMillDataSheet"
+    "Ball Mill Data Sheet" : "united_chemie.united_chemie.override.override_doctype_class.ball_mill_data_sheet.BallMillDataSheet",
+    "Exchange Rate Revaluation": "united_chemie.united_chemie.override.override_doctype_class.exchange_rate_revaluation.CustomExchangeRateRevaluation"
 }
 
 # Document Events
@@ -169,7 +170,8 @@ doc_events = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "united_chemie.event.get_events"
+# 	"erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation.ExchangeRateRevaluation.make_jv_for_revaluation":
+#         "united_chemie.united_chemie.override.override_doctype_class.exchange_rate_revaluation.CustomExchangeRateRevaluation.make_jv_for_revaluation"
 # }
 #
 # each overriding function accepts a `data` argument;
