@@ -135,6 +135,9 @@ doc_events = {
         "before_save": "united_chemie.united_chemie.doc_events.sales_invoice.before_save",
         "on_submit": "united_chemie.united_chemie.doc_events.sales_invoice.on_submit"
     },
+    "Stock Entry": {
+        "validate": "united_chemie.united_chemie.doc_events.stock_entry.validate",
+    }
     # "Purchase Invoice": {
     #     "validate": "united_chemie.transaction.validate",
 	# }

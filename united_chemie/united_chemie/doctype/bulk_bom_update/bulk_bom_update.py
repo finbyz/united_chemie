@@ -55,7 +55,7 @@ class BulkBOMUpdate(Document):
             
             for cost in self.additional_cost:
                 bom_doc.append("additional_cost", {
-                    "description": cost.description,
+                    "description": cost.account,
                     "account":cost.account,
                     "qty": cost.qty,
                     "uom": cost.uom,
@@ -67,7 +67,6 @@ class BulkBOMUpdate(Document):
             bom_doc.save()
 
             frappe.msgprint(_("Additional costs added to BOM {0}").format(bom_detail.bom))
-            # update_bom_cost(bom_doc.name)
             cost_calculation(bom_doc)
 
 @frappe.whitelist()
