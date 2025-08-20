@@ -1,6 +1,9 @@
 # Copyright (c) 2022, Finbyz Tech Pvt Ltd and contributors
 # For license information, please see license.txt
 
+# Copyright (c) 2022, Finbyz Tech Pvt Ltd and contributors
+# For license information, please see license.txt
+
 from collections import defaultdict
 import frappe
 from frappe import _, scrub
@@ -17,6 +20,7 @@ def execute(filters=None):
 	gross_profit_data = GrossProfitGenerator(filters)
 	data = []
 	
+	# --- Purchase Invoice based indirect expenses ---
 	indirect_expence_data_account_wise = frappe.db.sql("""
 		SELECT
 			pii.indirect_expense_for_sales AS sales_invoice,
@@ -37,21 +41,26 @@ def execute(filters=None):
 	sales_invoice_expenses = defaultdict(list)
 	expence_accounts = set()
 	for row in indirect_expence_data_account_wise:
-		expence_accounts.add(row["expense_account"])
+		company = frappe.get_value("Account", row["expense_account"], "company")
+		if company == filters.company:
+			expence_accounts.add(row["expense_account"])
 	expence_accounts = sorted(list(expence_accounts))
-	expence_head_columns = [{"label": account, "fieldname": scrub(account), "fieldtype": "Currency", "width": 120} for account in expence_accounts]
+	expence_head_columns = [
+		{"label": account, "fieldname": scrub(account), "fieldtype": "Currency", "width": 120}
+		for account in expence_accounts
+	]
+
 	for row in indirect_expence_data_account_wise:
 		sales_invoice_expenses[row["sales_invoice"]].append({
 			"expense_account": row["expense_account"],
 			"expense_amount": row["expense_amount"]
 		})
 	
-	# Get Loading Unloading Charges data from Journal Entry
+	# --- Journal Entry based charges ---
 	loading_unloading_charges = get_loading_unloading_charges()
-	
-	# Get Combined Foreign Bank Charges data from Journal Entry
 	foreign_bank_charges_combined = get_foreign_bank_charges_combined()
 	
+	# --- Columns setup ---
 	group_wise_columns = frappe._dict({
 		"invoice": [
 			"invoice_or_item", "customer", "customer_group", "posting_date", "item_code", "item_name",
@@ -109,6 +118,7 @@ def execute(filters=None):
 	columns = get_columns(group_wise_columns, filters)
 	columns.extend(expence_head_columns)
 	
+	# --- Data fetch ---
 	if filters.group_by == "Invoice":
 		get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_wise_columns, data)
 	else:
@@ -116,7 +126,10 @@ def execute(filters=None):
 	
 	chart_data = get_chart_data(data, filters)
 	
-	# Process data to add expense accounts and charges
+	# --- Process data rows ---
+	# Accounts that are in foreign currency and need conversion
+	foreign_currency_accounts = {scrub("Freight Outward - UCPL")}
+
 	for row in data:
 		sales_invoice_name = None
 		
@@ -146,14 +159,21 @@ def execute(filters=None):
 				scrub("Freight Outward - UCPL")
 			]
 			
-			# Calculate total indirect expense
+			# Calculate total indirect expense in company currency
 			total_indirect_expence = 0.0
 			for field in expense_fields_to_sum:
-				total_indirect_expence += flt(row.get(field, 0.0))
+				value = flt(row.get(field, 0.0))
+
+				# Convert if account is in foreign currency
+				if field in foreign_currency_accounts and row.get("conversion_rate"):
+					value = value * flt(row["conversion_rate"])
+
+				total_indirect_expence += value
 
 			row["indirect_expence"] = total_indirect_expence
 
-	return columns, data, None, chart_data	
+	return columns, data, None, chart_data
+
 
 def get_loading_unloading_charges():
 	"""
