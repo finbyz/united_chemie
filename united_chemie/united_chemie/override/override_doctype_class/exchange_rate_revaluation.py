@@ -54,8 +54,8 @@ class CustomExchangeRateRevaluation(ExchangeRateRevaluation):
                     "balance": flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")),
                     "exchange_rate": 0,
                     "cost_center": erpnext.get_default_cost_center(self.company),
-                    # "reference_type": "Exchange Rate Revaluation",
-                    # "reference_name": self.name,
+                    "reference_type": "Exchange Rate Revaluation",
+                    "reference_name": self.name,
                 }
             )
 
@@ -92,8 +92,8 @@ class CustomExchangeRateRevaluation(ExchangeRateRevaluation):
                         "credit_in_account_currency": abs(d.gain_loss) if d.gain_loss > 0 else 0,
                         "cost_center": erpnext.get_default_cost_center(self.company),
                         "exchange_rate": 1,
-                        # "reference_type": "Exchange Rate Revaluation",
-                        # "reference_name": self.name,
+                        "reference_type": "Exchange Rate Revaluation",
+                        "reference_name": self.name,
                     }
                 )
 
@@ -121,8 +121,8 @@ class CustomExchangeRateRevaluation(ExchangeRateRevaluation):
                         "credit_in_account_currency": 0,
                         "cost_center": erpnext.get_default_cost_center(self.company),
                         "exchange_rate": 1,
-                        # "reference_type": "Exchange Rate Revaluation",
-                        # "reference_name": self.name,
+                        "reference_type": "Exchange Rate Revaluation",
+                        "reference_name": self.name,
                     }
                 )
 
@@ -178,10 +178,10 @@ class CustomExchangeRateRevaluation(ExchangeRateRevaluation):
             )
 
             reference_fields = {}
-            # if d.get("party_type") == "Customer" and dr_or_cr == "debit_in_account_currency":
-            #     reference_fields = {"reference_type": "Exchange Rate Revaluation", "reference_name": self.name}
-            # elif d.get("party_type") == "Supplier" and dr_or_cr == "credit_in_account_currency":
-            #     reference_fields = {"reference_type": "Exchange Rate Revaluation", "reference_name": self.name}
+            if d.get("party_type") == "Customer" and dr_or_cr == "debit_in_account_currency":
+                reference_fields = {"reference_type": "Exchange Rate Revaluation", "reference_name": self.name}
+            elif d.get("party_type") == "Supplier" and dr_or_cr == "credit_in_account_currency":
+                reference_fields = {"reference_type": "Exchange Rate Revaluation", "reference_name": self.name}
 
             journal_entry_accounts.append(
                 {
