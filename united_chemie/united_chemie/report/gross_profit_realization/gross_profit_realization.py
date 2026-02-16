@@ -1236,32 +1236,15 @@ def execute(filters=None):
             
             # Set Foreign Bank Charges (always in INR/company currency)
             row['foreign_bank_charges'] = foreign_bank_charges.get(sales_invoice_name, 0.0)
-
-            # Prepare list of expense fields to sum (all in company currency)
-            expense_fields_to_sum = [
-                'debit_in_account_currency',
-                'insurance_charges',
-                'foreign_bank_charges',
-                scrub("Export Bank Charges - UCPL"),
-                scrub("Export Expense - UCPL"),
-                scrub("Freight Outward - UCPL")
-            ]
             
-            # Add dynamic expense accounts from Purchase Invoice
-            for account in expence_accounts:
-                expense_fields_to_sum.append(scrub(account))
-            
-            # Calculate total indirect expense in company currency
-            total_indirect_expence = 0.0
-            for field in expense_fields_to_sum:
-                value = flt(row.get(field, 0.0))
+            # SIMPLE CALCULATION: Sum only the three main columns shown in your image
+            total_indirect_expence = (
+                flt(row.get('debit_in_account_currency', 0.0)) +  # Loading Unloading Charges
+                flt(row.get('insurance_charges', 0.0)) +          # Insurance (Marine) - UCPL
+                flt(row.get('foreign_bank_charges', 0.0))         # Foreign Bank Charges INR
+            )
 
-                # Convert if account is in foreign currency
-                if field in foreign_currency_accounts and row.get("conversion_rate"):
-                    value = value * flt(row["conversion_rate"])
-
-                total_indirect_expence += value
-
+            # Store the total in indirect_expence column
             row["indirect_expence"] = total_indirect_expence
             
             # Calculate Per Kg Indirect Expense (INR per KG)
@@ -1497,6 +1480,7 @@ def get_columns(group_wise_columns, filters, expence_head_columns=None):
         },
         "invoice_or_item": {
             "label": _("Sales Invoice"),
+            "fieldname": "sales_invoice",
             "fieldtype": "Link",
             "options": "Sales Invoice",
             "width": 120,
@@ -1661,13 +1645,13 @@ def get_columns(group_wise_columns, filters, expence_head_columns=None):
             "options": "company_currency",
             "width": 120,
         },
-        "foreign_bank_charges": {
-            "label": _("Foreign Bank Charges INR"),
-            "fieldname": "foreign_bank_charges",
-            "fieldtype": "Currency",
-            "options": "company_currency",
-            "width": 180,
-        },
+        # "foreign_bank_charges": {
+        #     "label": _("Foreign Bank Charges INR"),
+        #     "fieldname": "foreign_bank_charges",
+        #     "fieldtype": "Currency",
+        #     "options": "company_currency",
+        #     "width": 180,
+        # },
         "indirect_expence": {
             "label": _("Indirect Expense"),
             "fieldname": "indirect_expence",
@@ -1723,13 +1707,13 @@ def get_columns(group_wise_columns, filters, expence_head_columns=None):
                 "options": "company_currency",
                 "width": 120,
             },
-            {
-                "label": _("Foreign Bank Charges INR"),
-                "fieldname": "foreign_bank_charges",
-                "fieldtype": "Currency",
-                "options": "company_currency",
-                "width": 180,
-            },
+            # {
+            #     "label": _("Foreign Bank Charges INR"),
+            #     "fieldname": "foreign_bank_charges",
+            #     "fieldtype": "Currency",
+            #     "options": "company_currency",
+            #     "width": 180,
+            # },
         ])
 
     columns.append({
@@ -1778,7 +1762,7 @@ def get_column_names():
         "packaging_material": "packaging_material",
         "debit_in_account_currency": "debit_in_account_currency",
         "insurance_charges": "insurance_charges",
-        "foreign_bank_charges": "foreign_bank_charges",
+        # "foreign_bank_charges": "foreign_bank_charges",
         "indirect_expence": "indirect_expence",
         "per_kg_indirect_expense": "per_kg_indirect_expense",
         "buying_plus_indirect": "buying_plus_indirect",
