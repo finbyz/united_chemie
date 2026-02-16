@@ -1241,7 +1241,12 @@ def execute(filters=None):
             total_indirect_expence = (
                 flt(row.get('debit_in_account_currency', 0.0)) +  # Loading Unloading Charges
                 flt(row.get('insurance_charges', 0.0)) +          # Insurance (Marine) - UCPL
-                flt(row.get('foreign_bank_charges', 0.0))         # Foreign Bank Charges INR
+                flt(row.get('foreign_bank_charges', 0.0)) +       # Foreign Bank Charges INR
+                flt(row.get(scrub("Export Bank Charges - UCPL"), 0.0)) +  # Export Bank Charges
+                flt(row.get(scrub("Export Expense - UCPL"), 0.0)) +       # Export Expense
+                flt(row.get(scrub("Freight Outward - UCPL"), 0.0)) +      # Freight Outward
+                flt(row.get(scrub("Packing Expense - UCPL"), 0.0)) +      # Packing Expense
+                flt(row.get(scrub("Selling Commission - UCPL"), 0.0))  # Selling Commission
             )
 
             # Store the total in indirect_expence column
