@@ -1153,7 +1153,7 @@ def execute(filters=None):
         SELECT
             pii.indirect_expense_for_sales AS sales_invoice,
             pii.expense_account,
-            SUM(pii.net_amount) AS expense_amount
+            SUM(pii.base_amount) AS expense_amount
         FROM
             `tabPurchase Invoice Item` AS pii
         INNER JOIN `tabPurchase Invoice` AS pi ON pii.parent = pi.name AND pi.docstatus = 1
