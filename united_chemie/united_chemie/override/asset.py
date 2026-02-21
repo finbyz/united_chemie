@@ -20,10 +20,10 @@ def custom_get_depreciation_amount(
 	if fb_row.depreciation_method in ("Straight Line", "Manual"):
 		return get_straight_line_or_manual_depr_amount(
 			asset_depr_schedule, asset, fb_row, schedule_idx, number_of_pending_depreciations
-		)
+		), None
 	else:
 		if fb_row.shift_based and fb_row.depreciation_method == "Written Down Value":
-			return get_shift_depr_amount(asset_depr_schedule, asset, fb_row, schedule_idx)
+			return get_shift_depr_amount(asset_depr_schedule, asset, fb_row, schedule_idx), None
 
 		return get_wdv_or_dd_depr_amount(
 			asset,
